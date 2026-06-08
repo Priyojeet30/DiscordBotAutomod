@@ -13,19 +13,14 @@ from database import (
 )
 
 
-# ════════════════════════════════════════════════════════
-# CONSTANTS
-# ════════════════════════════════════════════════════════
+
 
 BAD_WORDS = [
-    "fuck", "shit", "ass", "bitch", "bastard",
-    "dick", "pussy", "cunt", "nigga", "nigger",
-    "fag", "faggot", "whore", "slut", "retard",
+
     
 ]
 
-# Maps lookalike characters to their plain equivalents
-# Prevents evasion like @ss, sh!t, fück, etc.
+
 CHAR_MAP = {
     '@': 'a', '4': 'a', 'á': 'a', 'à': 'a', 'â': 'a', 'ä': 'a', 'ã': 'a', 'å': 'a',
     '3': 'e', 'é': 'e', 'è': 'e', 'ê': 'e', 'ë': 'e',
