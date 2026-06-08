@@ -6,13 +6,11 @@ import os
 import sys
 from dotenv import load_dotenv
 
-# ── Ensure the bot's own folder is always on the path ──
-# This lets automod.py do "from database import ..." correctly
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from database import init_db
 
-# ── Load token ──────────────────────────────────────────
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 

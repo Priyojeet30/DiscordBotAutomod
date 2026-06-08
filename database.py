@@ -12,20 +12,15 @@ def now_ist():
     return utc, ist
 
 
-# ── Connection ──────────────────────────────────────────
 client = motor.motor_asyncio.AsyncIOMotorClient(os.getenv("MONGO_URL"))
 db     = client["automod_bot"]
 
-# ── Collections ─────────────────────────────────────────
 guild_settings_col   = db["guild_settings"]
 automod_settings_col = db["automod_settings"]
 warnings_col         = db["warnings"]
 strikes_col          = db["strikes"]
 
 
-# ════════════════════════════════════════════════════════
-# INIT
-# ════════════════════════════════════════════════════════
 
 async def init_db():
     await guild_settings_col.create_index("guild_id",   unique=True)
@@ -35,10 +30,6 @@ async def init_db():
     print("✅ Database indexes created successfully.")
 
 
-# ════════════════════════════════════════════════════════
-# GUILD SETTINGS
-# Stores: log_channel ID
-# ════════════════════════════════════════════════════════
 
 async def get_guild_settings(guild_id: int) -> dict:
     doc = await guild_settings_col.find_one({"guild_id": str(guild_id)})
@@ -53,10 +44,6 @@ async def set_guild_setting(guild_id: int, key: str, value) -> None:
     )
 
 
-# ════════════════════════════════════════════════════════
-# AUTOMOD SETTINGS
-# Stores all filter toggles + punishment level + blacklist
-# ════════════════════════════════════════════════════════
 
 async def get_automod(guild_id: int) -> dict:
     doc = await automod_settings_col.find_one(
@@ -101,10 +88,6 @@ async def get_blacklist(guild_id: int) -> list[str]:
     return doc.get("blacklist", [])
 
 
-# ════════════════════════════════════════════════════════
-# WARNINGS
-# One document per violation — used for /warnings command
-# ════════════════════════════════════════════════════════
 
 async def add_warning(guild_id: int, user_id: int, reason: str) -> int:
     """Insert a warning and return the new total count for this user."""
@@ -136,10 +119,6 @@ async def clear_warnings(guild_id: int, user_id: int) -> int:
     return result.deleted_count
 
 
-# ════════════════════════════════════════════════════════
-# STRIKES
-# Increments per violation — drives punishment escalation
-# ════════════════════════════════════════════════════════
 
 async def get_strikes(guild_id: int, user_id: int) -> int:
     doc = await strikes_col.find_one(

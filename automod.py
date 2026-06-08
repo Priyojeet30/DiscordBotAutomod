@@ -21,7 +21,7 @@ BAD_WORDS = [
     "fuck", "shit", "ass", "bitch", "bastard",
     "dick", "pussy", "cunt", "nigga", "nigger",
     "fag", "faggot", "whore", "slut", "retard",
-    # Add more here as needed
+    
 ]
 
 # Maps lookalike characters to their plain equivalents
@@ -53,9 +53,7 @@ SCAM_PATTERNS = [
 ]
 
 
-# ════════════════════════════════════════════════════════
-# AUTOMOD COG
-# ════════════════════════════════════════════════════════
+
 
 class AutoMod(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -66,9 +64,7 @@ class AutoMod(commands.Cog):
         self._flood_tracker:     dict[int, list[float]] = {}  # uid → [timestamps]
         self._duplicate_tracker: dict[int, str]         = {}  # uid → last_message
 
-    # ════════════════════════════════════════════════
-    # LOG CHANNEL
-    # ════════════════════════════════════════════════
+
 
     async def get_log_channel(self, guild: discord.Guild) -> discord.TextChannel | None:
         settings = await get_guild_settings(guild.id)
@@ -137,10 +133,6 @@ class AutoMod(commands.Cog):
         except Exception as e:
             print(f"[AutoMod] Could not send log: {e}")
 
-    # ════════════════════════════════════════════════
-    # PUNISHMENT ENGINE
-    # Escalates based on configured level + strike count
-    # ════════════════════════════════════════════════
 
     async def punish(self, message: discord.Message, filter_name: str, reason: str):
         member  = message.author
@@ -237,11 +229,7 @@ class AutoMod(commands.Cog):
         # 5 ── Send to log channel
         await self.send_log(guild, filter_name, member, content, action_taken)
 
-    # ════════════════════════════════════════════════
-    # TEXT NORMALIZATION
-    # Converts evasion attempts into their plain form
-    # so detection is consistent regardless of tricks
-    # ════════════════════════════════════════════════
+
 
     def _normalize(self, text: str) -> tuple[str, str, str]:
         """
@@ -334,9 +322,7 @@ class AutoMod(commands.Cog):
         stripped, spaced, raw = self._normalize(text)
         return any(self._word_matches(w.lower(), stripped, spaced, raw) for w in words)
 
-    # ════════════════════════════════════════════════
-    # INDIVIDUAL FILTER CHECK METHODS
-    # ════════════════════════════════════════════════
+
 
     def _check_caps(self, content: str) -> bool:
         """True if >70% of alphabetic characters are uppercase. Min 10 chars."""
@@ -403,9 +389,7 @@ class AutoMod(commands.Cog):
         found_ids = re.findall(r'<a?:\w+:(\d+)>', message.content)
         return any(eid not in guild_emoji_ids for eid in found_ids)
 
-    # ════════════════════════════════════════════════
-    # ON MESSAGE — main filter runner
-    # ════════════════════════════════════════════════
+
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -521,9 +505,7 @@ class AutoMod(commands.Cog):
             await self.punish(message, "Word Blacklist", "Blacklisted word detected")
             return
 
-    # ════════════════════════════════════════════════
-    # TOGGLE HELPER
-    # ════════════════════════════════════════════════
+
 
     async def _toggle(
         self,
@@ -541,9 +523,7 @@ class AutoMod(commands.Cog):
             f"🛡️ **{label}** is now {status}!{extra}", ephemeral=True
         )
 
-    # ════════════════════════════════════════════════
-    # FILTER TOGGLE COMMANDS
-    # ════════════════════════════════════════════════
+
 
     @app_commands.command(name="antispam", description="Toggle anti-spam (5 messages in 5 seconds)")
     @app_commands.checks.has_permissions(administrator=True)
@@ -695,9 +675,7 @@ class AutoMod(commands.Cog):
         if isinstance(error, app_commands.MissingPermissions):
             await interaction.response.send_message("❌ Administrator permission required!", ephemeral=True)
 
-    # ════════════════════════════════════════════════
-    # WORD BLACKLIST COMMANDS
-    # ════════════════════════════════════════════════
+
 
     @app_commands.command(name="blacklistword", description="Add a word to this server's custom word filter")
     @app_commands.describe(word="Word to blacklist")
@@ -750,9 +728,7 @@ class AutoMod(commands.Cog):
         if isinstance(error, app_commands.MissingPermissions):
             await interaction.response.send_message("❌ Administrator permission required!", ephemeral=True)
 
-    # ════════════════════════════════════════════════
-    # PUNISHMENT CONFIGURATION
-    # ════════════════════════════════════════════════
+
 
     @app_commands.command(name="setpunishment", description="Set the default punishment for AutoMod violations")
     @app_commands.describe(level="Punishment level to apply")
@@ -790,9 +766,6 @@ class AutoMod(commands.Cog):
         if isinstance(error, app_commands.MissingPermissions):
             await interaction.response.send_message("❌ Administrator permission required!", ephemeral=True)
 
-    # ════════════════════════════════════════════════
-    # LOG CHANNEL CONFIGURATION
-    # ════════════════════════════════════════════════
 
     @app_commands.command(name="setlogchannel", description="Set the channel for AutoMod violation logs")
     @app_commands.describe(channel="Channel to send AutoMod logs to")
@@ -808,9 +781,7 @@ class AutoMod(commands.Cog):
         if isinstance(error, app_commands.MissingPermissions):
             await interaction.response.send_message("❌ Administrator permission required!", ephemeral=True)
 
-    # ════════════════════════════════════════════════
-    # STATUS DASHBOARD
-    # ════════════════════════════════════════════════
+
 
     @app_commands.command(name="automodstatus", description="View all AutoMod filter statuses for this server")
     @app_commands.checks.has_permissions(administrator=True)
@@ -892,9 +863,7 @@ class AutoMod(commands.Cog):
         if isinstance(error, app_commands.MissingPermissions):
             await interaction.response.send_message("❌ Administrator permission required!", ephemeral=True)
 
-    # ════════════════════════════════════════════════
-    # WARNINGS COMMANDS
-    # ════════════════════════════════════════════════
+
 
     @app_commands.command(name="warnings", description="View AutoMod warnings for a member")
     @app_commands.describe(member="The member to check")
@@ -960,9 +929,7 @@ class AutoMod(commands.Cog):
         if isinstance(error, app_commands.MissingPermissions):
             await interaction.response.send_message("❌ Administrator permission required!", ephemeral=True)
 
-    # ════════════════════════════════════════════════
-    # STRIKES COMMANDS
-    # ════════════════════════════════════════════════
+
 
     @app_commands.command(name="strikes", description="Check a member's AutoMod strike count")
     @app_commands.describe(member="The member to check")
@@ -1003,14 +970,248 @@ class AutoMod(commands.Cog):
         if isinstance(error, app_commands.MissingPermissions):
             await interaction.response.send_message("❌ Administrator permission required!", ephemeral=True)
 
-    # ════════════════════════════════════════════════
-    # AUTO LOG CHANNEL ON GUILD JOIN
-    # ════════════════════════════════════════════════
+
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild: discord.Guild):
         """Auto-create the log channel when the bot joins a new server."""
         await self.get_log_channel(guild)
+
+
+    @app_commands.command(name="help", description="Show all AutoMod bot commands")
+    async def help_cmd(self, interaction: discord.Interaction):
+        view  = HelpView(interaction.user.id)
+        embed = help_home_embed()
+        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+
+
+
+
+def help_home_embed() -> discord.Embed:
+    embed = discord.Embed(
+        title="🛡️ AutoMod Bot — Help",
+        description=(
+            "Welcome! Use the buttons below to explore all commands.\n\n"
+            "🏠 **Home** — You are here\n"
+            "⚡ **Filters** — Toggle automod filters on/off\n"
+            "🔤 **Words** — Blacklist / whitelist words\n"
+            "⚙️ **Config** — Setup log channel & punishment\n"
+            "⚠️ **Moderation** — Warnings & strikes management\n"
+            "📊 **Status** — View current settings dashboard"
+        ),
+        color=discord.Color.blurple()
+    )
+    embed.set_footer(text="All commands are admin-only unless stated otherwise")
+    return embed
+
+
+def help_filters_embed() -> discord.Embed:
+    embed = discord.Embed(
+        title="⚡ Filter Toggle Commands",
+        description="Each command **toggles** the filter ON or OFF.\nAll require **Administrator** permission.",
+        color=discord.Color.blue()
+    )
+    embed.add_field(
+        name="⚡ Rate / Spam",
+        value=(
+            "`/antispam` — Block 5+ messages in 5 seconds\n"
+            "`/antiflood` — Block 8+ messages in 10 seconds\n"
+            "`/antiduplicate` — Block repeated consecutive messages"
+        ),
+        inline=False
+    )
+    embed.add_field(
+        name="📝 Text Content",
+        value=(
+            "`/anticaps` — Block >70% capital letters (min 10 chars)\n"
+            "`/antiemoji` — Block more than 5 emojis per message\n"
+            "`/antimention` — Block more than 3 mentions per message\n"
+            "`/antizalgo` — Block zalgo / glitch text\n"
+            "`/antinewline` — Block more than 10 line breaks\n"
+            "`/repeatedchar` — Block 10+ repeated identical characters"
+        ),
+        inline=False
+    )
+    embed.add_field(
+        name="🔗 Links & Content",
+        value=(
+            "`/antilink` — Block all URLs (http, https, www)\n"
+            "`/antiinvite` — Block Discord invite links\n"
+            "`/antiscam` — Block known scam patterns & phishing\n"
+            "`/antieveryone` — Block @everyone / @here for non-admins\n"
+            "`/antiattachment` — Block all file & image uploads\n"
+            "`/antiexternalemoji` — Block emojis from other servers"
+        ),
+        inline=False
+    )
+    embed.set_footer(text="✅ Bad word filter & custom blacklist are always active — no toggle needed")
+    return embed
+
+
+def help_words_embed() -> discord.Embed:
+    embed = discord.Embed(
+        title="🔤 Word Filter Commands",
+        description=(
+            "The **bad word filter** is always active and catches evasion like `f*ck`, `@ss`, `fück` etc.\n"
+            "You can also add your own custom words per server."
+        ),
+        color=discord.Color.red()
+    )
+    embed.add_field(
+        name="📋 Commands",
+        value=(
+            "`/blacklistword <word>` — Add a word to this server's filter\n"
+            "`/whitelistword <word>` — Remove a word from this server's filter\n"
+            "`/blacklist` — View all custom blacklisted words"
+        ),
+        inline=False
+    )
+    embed.add_field(
+        name="ℹ️ How evasion detection works",
+        value=(
+            "• `f*ck` → caught via skip-vowel pattern\n"
+            "• `@ss` → caught via character map (@=a)\n"
+            "• `f u c k` → caught via space-collapse\n"
+            "• `fück` → caught via unicode normalization"
+        ),
+        inline=False
+    )
+    embed.set_footer(text="All word commands require Administrator permission")
+    return embed
+
+
+def help_config_embed() -> discord.Embed:
+    embed = discord.Embed(
+        title="⚙️ Configuration Commands",
+        description="Setup your AutoMod bot for this server.",
+        color=discord.Color.green()
+    )
+    embed.add_field(
+        name="📋 Log Channel",
+        value=(
+            "`/setlogchannel <channel>` — Set where violation logs are sent\n"
+            "ℹ️ If not set, bot auto-creates `#automod-logs` on first violation"
+        ),
+        inline=False
+    )
+    embed.add_field(
+        name="⚡ Punishment Level",
+        value=(
+            "`/setpunishment <level>` — Set what happens on violation\n\n"
+            "`warn` — DM warning only *(default)*\n"
+            "`mute` — Timeout (10min × strike count)\n"
+            "`kick` — Remove from server\n"
+            "`ban` — Permanently ban\n\n"
+            "**Auto-escalation:**\n"
+            "Strike 3+ → Timeout | Strike 5+ → Kick | Strike 7+ → Ban"
+        ),
+        inline=False
+    )
+    embed.set_footer(text="All config commands require Administrator permission")
+    return embed
+
+
+def help_moderation_embed() -> discord.Embed:
+    embed = discord.Embed(
+        title="⚠️ Warnings & Strikes Commands",
+        description="Manage AutoMod violation records for members.",
+        color=discord.Color.orange()
+    )
+    embed.add_field(
+        name="⚠️ Warnings",
+        value=(
+            "`/warnings <member>` — View all warnings *(Manage Messages)*\n"
+            "`/clearwarnings <member>` — Clear warnings + reset strikes *(Admin)*"
+        ),
+        inline=False
+    )
+    embed.add_field(
+        name="🔢 Strikes",
+        value=(
+            "`/strikes <member>` — Check strike count *(Manage Messages)*\n"
+            "`/resetstrikes <member>` — Reset strikes to 0 *(Admin)*"
+        ),
+        inline=False
+    )
+    embed.add_field(
+        name="📋 Strike Thresholds",
+        value=(
+            "Strike 1-2 → Warning only\n"
+            "Strike 3+ → Timeout (10min × strikes)\n"
+            "Strike 5+ → Kicked from server\n"
+            "Strike 7+ → Permanently banned"
+        ),
+        inline=False
+    )
+    embed.set_footer(text="Strikes reset automatically when cleared")
+    return embed
+
+
+def help_status_embed() -> discord.Embed:
+    embed = discord.Embed(
+        title="📊 Status & Quick Setup",
+        color=discord.Color.blurple()
+    )
+    embed.add_field(
+        name="📊 Commands",
+        value=(
+            "`/automodstatus` — Full overview of all filters, punishment, log channel\n"
+            "`/blacklist` — View custom blacklisted words\n"
+            "`/warnings <member>` — View violation history\n"
+            "`/strikes <member>` — View strike count"
+        ),
+        inline=False
+    )
+    embed.add_field(
+        name="🚀 Quick Setup Guide",
+        value=(
+            "1️⃣ `/setlogchannel #channel` — set log destination\n"
+            "2️⃣ `/setpunishment mute` — choose punishment level\n"
+            "3️⃣ `/antispam` `/antilink` `/antiscam` — enable filters\n"
+            "4️⃣ `/blacklistword <word>` — add custom words\n"
+            "5️⃣ `/automodstatus` — confirm everything is set"
+        ),
+        inline=False
+    )
+    embed.set_footer(text="Use /help anytime to come back here")
+    return embed
+
+class HelpView(discord.ui.View):
+    def __init__(self, user_id: int):
+        super().__init__(timeout=120)
+        self.user_id = user_id
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        if interaction.user.id != self.user_id:
+            await interaction.response.send_message(
+                "❌ These buttons are not for you!", ephemeral=True
+            )
+            return False
+        return True
+
+    @discord.ui.button(label="🏠 Home",       style=discord.ButtonStyle.primary)
+    async def home(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.edit_message(embed=help_home_embed(), view=self)
+
+    @discord.ui.button(label="⚡ Filters",    style=discord.ButtonStyle.secondary)
+    async def filters(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.edit_message(embed=help_filters_embed(), view=self)
+
+    @discord.ui.button(label="🔤 Words",      style=discord.ButtonStyle.secondary)
+    async def words(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.edit_message(embed=help_words_embed(), view=self)
+
+    @discord.ui.button(label="⚙️ Config",     style=discord.ButtonStyle.success)
+    async def config(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.edit_message(embed=help_config_embed(), view=self)
+
+    @discord.ui.button(label="⚠️ Moderation", style=discord.ButtonStyle.danger)
+    async def moderation(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.edit_message(embed=help_moderation_embed(), view=self)
+
+    @discord.ui.button(label="📊 Status",     style=discord.ButtonStyle.primary)
+    async def status(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.edit_message(embed=help_status_embed(), view=self)
 
 
 async def setup(bot: commands.Bot):
